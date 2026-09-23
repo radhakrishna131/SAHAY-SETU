@@ -3,13 +3,21 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Workers Community platform API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: discovery
+    description: Public discovery and home overview
+  - name: jobs
+    description: Job discovery and applications
+  - name: marketplace
+    description: Tools and equipment marketplace
+  - name: communities
+    description: Worker communities and feeds
 paths:
   /healthz:
     get:
@@ -24,7 +32,203 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /overview:
+    get:
+      operationId: getOverview
+      tags: [discovery]
+      summary: Get the public home overview
+      responses:
+        "200":
+          description: Home overview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Overview"
+  /jobs:
+    get:
+      operationId: listJobs
+      tags: [jobs]
+      summary: List discoverable jobs
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: location
+          in: query
+          schema:
+            type: string
+        - name: type
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 12
+      responses:
+        "200":
+          description: Matching jobs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Job"
+  /jobs/{id}:
+    get:
+      operationId: getJob
+      tags: [jobs]
+      summary: Get a job
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200":
+          description: Job
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /marketplace/products:
+    get:
+      operationId: listProducts
+      tags: [marketplace]
+      summary: List marketplace products
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 12
+      responses:
+        "200":
+          description: Marketplace products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+  /rentals:
+    get:
+      operationId: listRentals
+      tags: [marketplace]
+      summary: List equipment rentals
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: location
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 12
+      responses:
+        "200":
+          description: Equipment rentals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Rental"
+  /workers:
+    get:
+      operationId: listWorkers
+      tags: [discovery]
+      summary: List workers
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: profession
+          in: query
+          schema:
+            type: string
+        - name: location
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 12
+      responses:
+        "200":
+          description: Workers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Worker"
+  /communities:
+    get:
+      operationId: listCommunities
+      tags: [communities]
+      summary: List communities
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 12
+      responses:
+        "200":
+          description: Communities
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Community"
 components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
   schemas:
     HealthStatus:
       type: object
@@ -33,4 +237,103 @@ components:
           type: string
       required:
         - status
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+    Overview:
+      type: object
+      required: [stats, featuredJobs, featuredProducts, featuredRentals, featuredCommunities]
+      properties:
+        stats:
+          type: object
+          required: [activeMembers, jobsPosted, communities, cities]
+          properties:
+            activeMembers: { type: integer }
+            jobsPosted: { type: integer }
+            communities: { type: integer }
+            cities: { type: integer }
+        featuredJobs:
+          type: array
+          items: { $ref: "#/components/schemas/Job" }
+        featuredProducts:
+          type: array
+          items: { $ref: "#/components/schemas/Product" }
+        featuredRentals:
+          type: array
+          items: { $ref: "#/components/schemas/Rental" }
+        featuredCommunities:
+          type: array
+          items: { $ref: "#/components/schemas/Community" }
+    Job:
+      type: object
+      required: [id, title, company, location, type, experience, salary, postedAt, imageUrl]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        company: { type: string }
+        companyInitials: { type: string }
+        location: { type: string }
+        type: { type: string }
+        experience: { type: string }
+        salary: { type: string }
+        postedAt: { type: string }
+        imageUrl: { type: string }
+        verified: { type: boolean }
+    Product:
+      type: object
+      required: [id, name, category, price, rating, reviews, seller, imageUrl, inStock]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        category: { type: string }
+        price: { type: number }
+        rating: { type: number }
+        reviews: { type: integer }
+        seller: { type: string }
+        imageUrl: { type: string }
+        inStock: { type: boolean }
+    Rental:
+      type: object
+      required: [id, name, category, pricePerDay, rating, location, owner, imageUrl, available]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        category: { type: string }
+        pricePerDay: { type: number }
+        rating: { type: number }
+        location: { type: string }
+        owner: { type: string }
+        imageUrl: { type: string }
+        available: { type: boolean }
+    Worker:
+      type: object
+      required: [id, name, profession, location, rating, experience, skills, imageUrl, verified]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        profession: { type: string }
+        location: { type: string }
+        rating: { type: number }
+        experience: { type: string }
+        skills:
+          type: array
+          items: { type: string }
+        imageUrl: { type: string }
+        verified: { type: boolean }
+    Community:
+      type: object
+      required: [id, name, category, description, members, imageUrl, topics]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        category: { type: string }
+        description: { type: string }
+        members: { type: integer }
+        imageUrl: { type: string }
+        topics:
+          type: array
+          items: { type: string }
 

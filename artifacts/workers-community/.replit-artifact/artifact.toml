@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Workers Community"
+description = "A professional network and marketplace for skilled workers to discover jobs, join communities, and buy or rent tools and equipment."
+version = "1.0.0"
+id = "artifacts/workers-community"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25058
+
+[services.development]
+run = "pnpm --filter @workspace/workers-community run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/workers-community", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/workers-community/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25058"
+BASE_PATH = "/"

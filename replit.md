@@ -1,6 +1,6 @@
-# [Project name]
+# Workers Community
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Workers Community is a professional network and discovery marketplace for skilled workers to find jobs, meet trade communities, and access tools and equipment.
 
 ## Run & Operate
 
@@ -22,23 +22,35 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/workers-community` — React/Vite frontend and route-level UI
+- `artifacts/api-server/src/routes` — Express API route handlers
+- `lib/api-spec/openapi.yaml` — source of truth for API contracts
+- `lib/db/src/schema/marketplace.ts` — Drizzle tables for the first discovery surfaces
+- `lib/api-client-react/src/generated` — generated React Query hooks
+- `lib/api-zod/src/generated` — generated request/response validation
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- The first product slice is a modular monolith: one shared Express API, one React app, and PostgreSQL-backed discovery tables.
+- OpenAPI is the contract boundary; frontend hooks and server validation are generated from `lib/api-spec/openapi.yaml`.
+- Public discovery pages are backed by database reads and seeded development records, not frontend-only arrays.
+- The interface follows the supplied Workers Community reference direction with a teal workwear palette, warm neutral surfaces, and amber emphasis.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Public home discovery with live counts and featured jobs, products, rentals, and communities.
+- Searchable jobs, workers, tools, equipment rentals, and communities.
+- Job detail, dashboard, login, and registration entry points are scaffolded for the next authentication and workflow increments.
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+No additional preferences recorded.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- Run API codegen after changing `lib/api-spec/openapi.yaml`.
+- The web artifact expects workflow-provided `PORT` and `BASE_PATH`; use the managed workflow for preview.
+- API requests should use the shared `/api` proxy path rather than hardcoded service ports.
 
 ## Pointers
 
